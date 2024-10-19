@@ -2,9 +2,15 @@ from sklearn.metrics.pairwise import cosine_similarity as cosine
 from typing import List
 import pandas as pd
 import numpy as np
+from numpy.linalg import norm
+from tkinter import Tk     # from tkinter import Tk for Python 3.x
+from tkinter.filedialog import askopenfilename
+import sys
 import random
 import math
-def preferences_func(csv, group_size, num_preferences, testing):
+# def cosine(A,B):
+#     return np.dot(A,B)/(norm(A)*norm(B))
+def preferences_func(csv, testing):
     df = pd.read_excel(csv)
 
     def data_cleaning_pipeline(df):
@@ -354,15 +360,31 @@ def return_finished_groups(groups, ids):
             row.append(ids[j])
         final.append(row)
     return final
+
+def write_to_xl(groups):
+    df = pd.DataFrame(columns=['GroupSet','GroupName','SisId'])
+    for grp_no, i in enumerate(groups):
+        for j in i:
+            row = {'GroupSet':'Assignment Group', 'GroupName':'Assignment Group '+ str(grp_no+1), 'SisId':j}
+            df = df.append(row, ignore_index=True)
+    print(df)
+    df.to_excel('output.xlsx', index=False)
+
 if __name__ == '__main__':
-    
-    group_size = 5
+    try:
+        file = str(sys.argv[1])
+        group_size = int(sys.argv[2])
+    except:
+        print("Script not called correctly, add appropriate arguments(file_path group_size)")
     # Hyper Parameters
-    # SET to 1 less than total number of ppl
-    num_preferences = 79 # Number of bonds to take into consideration(1 less than total population to consider all of them). IGNORED IN TRUE SCENARIO
     # SET to false in production
     testing = True
-    prefs = preferences_func("Matching Questionnaire (1-1).xlsx", group_size, num_preferences, testing)
+    Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+    file = askopenfilename() # show an "Open" dialog box and return the path to the selected file
+    print(file)
+    group_size=5
+    # file = "Matching Questionnaire (1-1).xlsx"
+    prefs = preferences_func(file,testing)
     # print(prefs)
     # print(preference_format_converter(prefs))
     pref,students = preference_format_converter(prefs)
@@ -370,17 +392,6 @@ if __name__ == '__main__':
     n = 10
 
     # np.savetxt("Data.csv", pref, delimiter=',', fmt="%d")
-
-    '''
-    perfect_groups = np.arange(n)
-    np.random.shuffle(perfect_groups)
-    perfect_groups =perfect_groups.reshape((-1,r))
-    for grp in perfect_groups:
-        for i in grp:
-            for j in grp:
-                pref[i][j]=10
-    '''
-
     matching = Matching(pref, group_size=group_size, iter_count=2, final_iter_count=2)
     score, groups = matching.solve()
     # print(pref)
@@ -388,4 +399,6 @@ if __name__ == '__main__':
     # print(groups)
     print(pref)
     print(students)
-    print(return_finished_groups(groups, students))
+    groups = return_finished_groups(groups, students)
+    print(groups)
+    write_to_xl(groups)
