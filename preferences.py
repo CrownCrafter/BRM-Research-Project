@@ -366,16 +366,18 @@ def write_to_xl(groups):
     for grp_no, i in enumerate(groups):
         for j in i:
             row = {'GroupSet':'Assignment Group', 'GroupName':'Assignment Group '+ str(grp_no+1), 'SisId':j}
-            df = df.append(row, ignore_index=True)
+            # df = df.append(row, ignore_index=True)
+            df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+
     print(df)
     df.to_excel('output.xlsx', index=False)
 
 if __name__ == '__main__':
-    try:
-        file = str(sys.argv[1])
-        group_size = int(sys.argv[2])
-    except:
-        print("Script not called correctly, add appropriate arguments(file_path group_size)")
+    # try:
+    #     file = str(sys.argv[1])
+    #     group_size = int(sys.argv[2])
+    # except:
+    #     print("Script not called correctly, add appropriate arguments(file_path group_size)")
     # Hyper Parameters
     # SET to false in production
     testing = True
