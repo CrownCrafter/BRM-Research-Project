@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 import numpy as np
 from numpy.linalg import norm
-from tkinter import Tk     # from tkinter import Tk for Python 3.x
+from tkinter import Tk, simpledialog, messagebox   # from tkinter import Tk for Python 3.x
 from tkinter.filedialog import askopenfilename
 import sys
 import random
@@ -361,16 +361,16 @@ def return_finished_groups(groups, ids):
         final.append(row)
     return final
 
-def write_to_xl(groups):
+def write_to_xl(groups, tutorial_name = "Assignment Group"):
     df = pd.DataFrame(columns=['GroupSet','GroupName','SisId'])
     for grp_no, i in enumerate(groups):
         for j in i:
-            row = {'GroupSet':'Assignment Group', 'GroupName':'Assignment Group '+ str(grp_no+1), 'SisId':j}
+            row = {'GroupSet':tutorial_name, 'GroupName':tutorial_name+' Group '+ str(grp_no+1), 'SisId':j}
             # df = df.append(row, ignore_index=True)
             df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
 
     print(df)
-    df.to_excel('output.xlsx', index=False)
+    df.to_excel(tutorial_name+'.xlsx', index=False)
 
 if __name__ == '__main__':
     # try:
@@ -382,8 +382,12 @@ if __name__ == '__main__':
     # SET to false in production
     testing = True
     Tk().withdraw() # we don't want a full GUI, so keep the root window from appearing
+    tutorial_name = simpledialog.askstring("Input", "Please enter Tutorial Group Name:")
+
     file = askopenfilename() # show an "Open" dialog box and return the path to the selected file
-    print(file)
+    if not file:
+        messagebox.showerror("Error", "No file selected. Exiting.")
+
     group_size=5
     # file = "Matching Questionnaire (1-1).xlsx"
     prefs = preferences_func(file,testing)
@@ -403,4 +407,4 @@ if __name__ == '__main__':
     print(students)
     groups = return_finished_groups(groups, students)
     print(groups)
-    write_to_xl(groups)
+    write_to_xl(groups, tutorial_name)
